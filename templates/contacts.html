@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="text-center mb-5">
+                <h1 class="display-4" style="color: #4CAF50;">Контакты</h1>
+                <p class="lead">Свяжитесь со мной для сотрудничества, консультаций или обмена опытом</p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-user-circle fa-3x text-success mb-3"></i>
+                            <h4>Парфирова Елена Юрьевна</h4>
+                            <p class="text-muted">Музыкальный руководитель высшей категории</p>
+
+                            <div class="contact-info mt-4">
+                                <div class="contact-item mb-3">
+                                    <i class="fas fa-envelope text-primary me-2"></i>
+                                    <strong>Email:</strong> parfirova.music@example.com
+                                </div>
+
+                                <div class="contact-item mb-3">
+                                    <i class="fas fa-graduation-cap text-success me-2"></i>
+                                    <strong>Образование:</strong> Высшее музыкально-педагогическое
+                                </div>
+
+                                <div class="contact-item mb-3">
+                                    <i class="fas fa-briefcase text-warning me-2"></i>
+                                    <strong>Стаж:</strong> 15+ лет
+                                </div>
+
+                                <div class="contact-item">
+                                    <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                                    <strong>Город:</strong> Самара
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h4 class="card-title mb-4">Написать сообщение</h4>
+
+                            <form>
+                                <div class="mb-3">
+                                    <label class="form-label">Ваше имя</label>
+                                    <input type="text" class="form-control" placeholder="Введите ваше имя">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Email для ответа</label>
+                                    <input type="email" class="form-control" placeholder="your@email.com">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Тема сообщения</label>
+                                    <select class="form-select">
+                                        <option selected>Выберите тему</option>
+                                        <option>Консультация по музыкальному развитию</option>
+                                        <option>Вопрос по методическим материалам</option>
+                                        <option>Предложение о сотрудничестве</option>
+                                        <option>Обмен опытом</option>
+                                        <option>Другое</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Сообщение</label>
+                                    <textarea class="form-control" rows="5"
+                                        placeholder="Опишите ваш вопрос или предложение..."></textarea>
+                                </div>
+
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="fas fa-paper-plane me-2"></i>Отправить сообщение
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mt-4">
+                <div class="card-body">
+                    <h4 class="card-title mb-4"><i class="fas fa-hands-helping me-2 text-primary"></i>Возможности
+                        сотрудничества</h4>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Для педагогов:</h6>
+                            <ul>
+                                <li>Консультации по организации музыкальных занятий</li>
+                                <li>Обмен сценариями праздников</li>
+                                <li>Совместные методические разработки</li>
+                                <li>Проведение мастер-классов</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Для родителей:</h6>
+                            <ul>
+                                <li>Консультации по музыкальному развитию детей</li>
+                                <li>Рекомендации по выбору музыкальных инструментов</li>
+                                <li>Советы по организации домашних музыкальных занятий</li>
+                                <li>Подбор репертуара для разных возрастов</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mt-4">
+                <div class="card-body text-center">
+                    <h4 class="card-title mb-4">Я в профессиональных сообществах</h4>
+
+                    <div class="social-links">
+                        <a href="#" class="btn btn-outline-primary me-2 mb-2">
+                            <i class="fab fa-vk me-1"></i>ВКонтакте
+                        </a>
+                        <a href="#" class="btn btn-outline-info me-2 mb-2">
+                            <i class="fab fa-telegram me-1"></i>Telegram
+                        </a>
+                        <a href="https://nsportal.ru/parfirova-elena-yurevna" class="btn btn-outline-success me-2 mb-2"
+                            target="_blank">
+                            <i class="fas fa-globe me-1"></i>nsportal.ru
+                        </a>
+                    </div>
+
+                    <p class="text-muted mt-3">
+                        <small>Присоединяйтесь к профессиональному общению!</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
