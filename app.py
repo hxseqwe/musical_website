@@ -3,7 +3,7 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 from config import Config
 from models import db, User, Material, PageVisit
@@ -24,7 +24,7 @@ os.makedirs('static/uploads', exist_ok=True)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 def create_admin():
     with app.app_context():
@@ -220,7 +220,9 @@ def materials():
 
 @app.route('/material/<int:material_id>')
 def material_detail(material_id):
-    material = Material.query.get_or_404(material_id)
+    material = db.session.get(Material, material_id)
+    if not material:
+        abort(404)
     log_visit(f'material_{material_id}')
     return render_template('material_detail.html', material=material)
 
@@ -265,7 +267,7 @@ def admin_dashboard():
         'published_materials': Material.query.filter_by(is_published=True).count(),
         'total_visits': PageVisit.query.count(),
         'recent_visits': PageVisit.query.filter(
-            PageVisit.visit_date >= datetime.utcnow().date()
+            PageVisit.visit_date >= datetime.now(timezone.utc).date()
         ).count()
     }
     
@@ -303,7 +305,9 @@ def admin_materials():
 @app.route('/admin/material/<int:material_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_material(material_id):
-    material = Material.query.get_or_404(material_id)
+    material = db.session.get(Material, material_id)
+    if not material:
+        abort(404)
     form = MaterialForm()
     
     if form.validate_on_submit():
@@ -332,7 +336,9 @@ def edit_material(material_id):
 @app.route('/admin/material/<int:material_id>/delete')
 @login_required
 def delete_material(material_id):
-    material = Material.query.get_or_404(material_id)
+    material = db.session.get(Material, material_id)
+    if not material:
+        abort(404)
     db.session.delete(material)
     db.session.commit()
     flash('Материал успешно удален!', 'success')
