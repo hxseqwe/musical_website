@@ -333,6 +333,30 @@ def edit_material(material_id):
     
     return render_template('admin/edit_material.html', form=form, material=material)
 
+@app.route('/admin/debug')
+@login_required
+def admin_debug():
+    """Страница для отладки БД"""
+    
+    users = User.query.all()
+    materials = Material.query.all()
+    visits = PageVisit.query.order_by(PageVisit.visit_date.desc()).limit(50).all()
+    
+    stats = {
+        'total_users': len(users),
+        'total_materials': len(materials),
+        'total_visits': PageVisit.query.count(),
+        'recent_visits': PageVisit.query.filter(
+            PageVisit.visit_date >= datetime.now(timezone.utc).date()
+        ).count()
+    }
+    
+    return render_template('admin/debug.html', 
+                         users=users, 
+                         materials=materials, 
+                         visits=visits, 
+                         stats=stats)
+
 @app.route('/admin/material/<int:material_id>/delete')
 @login_required
 def delete_material(material_id):

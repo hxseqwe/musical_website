@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Быстрые действия</h5>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{{ url_for('admin_materials') }}" class="btn btn-success">
+                        <i class="fas fa-plus me-1"></i>Добавить материал
+                    </a>
+                    <a href="{{ url_for('materials') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-eye me-1"></i>Просмотреть сайт
+                    </a>
+                    <a href="{{ url_for('admin_debug') }}" class="btn btn-outline-info">
+                        <i class="fas fa-bug me-1"></i>Отладка БД
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <!-- Статистика -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h3>{{ stats.total_users }}</h3>
+                    <p class="mb-0">Пользователей</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3>{{ stats.total_materials }}</h3>
+                    <p class="mb-0">Материалов</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h3>{{ stats.total_visits }}</h3>
+                    <p class="mb-0">Всего посещений</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h3>{{ stats.recent_visits }}</h3>
+                    <p class="mb-0">Сегодня</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Последние посещения -->
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Последние 50 посещений</h5>
+        </div>
+        <div class="card-body">
+            {% if visits %}
+            <div class="table-responsive">
+                <table class="table table-striped table-sm">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Страница</th>
+                            <th>Дата и время</th>
+                            <th>IP-адрес</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for visit in visits %}
+                        <tr>
+                            <td><small class="text-muted">#{{ visit.id }}</small></td>
+                            <td>
+                                <code>{{ visit.page }}</code>
+                            </td>
+                            <td>
+                                <small>{{ visit.visit_date.strftime('%d.%m.%Y %H:%M:%S') }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">{{ visit.ip_address }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-inbox fa-3x mb-3"></i>
+                <p>Нет данных о посещениях</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Материалы -->
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Все материалы ({{ materials|length }})</h5>
+        </div>
+        <div class="card-body">
+            {% if materials %}
+            <div class="table-responsive">
+                <table class="table table-striped table-sm">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Категория</th>
+                            <th>Аудитория</th>
+                            <th>Дата создания</th>
+                            <th>Опубликован</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for material in materials %}
+                        <tr>
+                            <td><small class="text-muted">#{{ material.id }}</small></td>
+                            <td>
+                                <strong>{{ material.title[:50] }}{% if material.title|length > 50 %}...{% endif %}</strong>
+                            </td>
+                            <td>
+                                <span class="badge bg-success">
+                                    {% if material.category == 'consultation' %}Консультация
+                                    {% elif material.category == 'scenario' %}Сценарий
+                                    {% elif material.category == 'methodical' %}Методичка
+                                    {% else %}Статья{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-info">
+                                    {% if material.target_audience == 'teachers' %}Педагоги
+                                    {% elif material.target_audience == 'parents' %}Родители
+                                    {% else %}Все{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <small>{{ material.created_date.strftime('%d.%m.%Y') }}</small>
+                            </td>
+                            <td>
+                                {% if material.is_published %}
+                                <span class="badge bg-success">Да</span>
+                                {% else %}
+                                <span class="badge bg-danger">Нет</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-file-alt fa-3x mb-3"></i>
+                <p>Нет материалов в базе данных</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Пользователи -->
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0"><i class="fas fa-users me-2"></i>Пользователи системы</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-sm">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Логин</th>
+                            <th>Email</th>
+                            <th>Администратор</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td><small class="text-muted">#{{ user.id }}</small></td>
+                            <td>
+                                <strong>{{ user.username }}</strong>
+                                {% if user.id == current_user.id %}
+                                <span class="badge bg-primary">Вы</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                {% if user.is_admin %}
+                                <span class="badge bg-success">Да</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Нет</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user.id != current_user.id %}
+                                <button class="btn btn-sm btn-outline-danger" disabled title="Удаление пользователей отключено">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                {% else %}
+                                <span class="text-muted">Текущий пользователь</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
