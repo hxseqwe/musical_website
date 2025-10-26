@@ -4,10 +4,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os
 from datetime import datetime, timezone
-
 from config import Config
-from models import db, User, Material, PageVisit
-from forms import LoginForm, MaterialForm
+from models import db, User, Material, PageVisit, Event
+from forms import LoginForm, MaterialForm, EventForm
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -195,6 +194,162 @@ def index():
     return render_template('index.html', 
                          latest_materials=latest_materials,
                          stats=stats)
+@app.route('/calendar')
+def calendar():
+    now = datetime.now(timezone.utc)
+    year = request.args.get('year', now.year, type=int)
+    month = request.args.get('month', now.month, type=int)
+    
+    start_date = datetime(year, month, 1)
+    if month == 12:
+        end_date = datetime(year + 1, 1, 1)
+    else:
+        end_date = datetime(year, month + 1, 1)
+    
+    events = Event.query.filter(
+        Event.event_date >= start_date,
+        Event.event_date < end_date
+    ).order_by(Event.event_date).all()
+    
+    events_by_date = {}
+    for event in events:
+        date_key = event.event_date.strftime('%Y-%m-%d')
+        if date_key not in events_by_date:
+            events_by_date[date_key] = []
+        events_by_date[date_key].append(event)
+    
+    prev_month = month - 1 if month > 1 else 12
+    prev_year = year if month > 1 else year - 1
+    next_month = month + 1 if month < 12 else 1
+    next_year = year if month < 12 else year + 1
+    
+    log_visit('calendar')
+    return render_template('calendar.html',
+                         events_by_date=events_by_date,
+                         year=year,
+                         month=month,
+                         prev_year=prev_year,
+                         prev_month=prev_month,
+                         next_year=next_year,
+                         next_month=next_month)
+
+@app.route('/event/<int:event_id>')
+def event_detail(event_id):
+    event = db.session.get(Event, event_id)
+    if not event:
+        abort(404)
+    
+    log_visit(f'event_{event_id}')
+    return render_template('event_detail.html', event=event)
+
+@app.route('/admin/events')
+@login_required
+def admin_events():
+    events = Event.query.order_by(Event.event_date.desc()).all()
+    
+    stats = {
+        'total': len(events),
+        'planned': len([e for e in events if e.status == 'Запланировано']),
+        'completed': len([e for e in events if e.status == 'Завершено']),
+        'this_month': len([e for e in events if e.event_date.month == datetime.now().month])
+    }
+    
+    return render_template('admin/events.html', events=events, stats=stats)
+
+@app.route('/admin/event/new', methods=['GET', 'POST'])
+@login_required
+def new_event():
+    form = EventForm()
+    
+    if form.validate_on_submit():
+        try:
+            event_date = datetime.strptime(form.event_date.data, '%Y-%m-%d')
+        except ValueError:
+            flash('Неверный формат даты. Используйте ГГГГ-ММ-ДД (например: 2024-12-25)', 'error')
+            return render_template('admin/event_form.html', form=form, title='Добавить мероприятие')
+        
+        event = Event(
+            title=form.title.data,
+            description=form.description.data,
+            event_date=event_date,
+            event_time=form.event_time.data,
+            event_type=form.event_type.data,
+            age_group=form.age_group.data,
+            location=form.location.data,
+            participants=form.participants.data,
+            materials=form.materials.data,
+            notes=form.notes.data,
+            status=form.status.data
+        )
+        
+        db.session.add(event)
+        db.session.commit()
+        
+        flash('Мероприятие успешно добавлено!', 'success')
+        return redirect(url_for('admin_events'))
+    
+    return render_template('admin/event_form.html', form=form, title='Добавить мероприятие')
+
+@app.route('/admin/event/<int:event_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_event(event_id):
+    event = db.session.get(Event, event_id)
+    if not event:
+        abort(404)
+    
+    form = EventForm()
+    
+    if form.validate_on_submit():
+        try:
+            event_date = datetime.strptime(form.event_date.data, '%Y-%m-%d')
+        except ValueError:
+            flash('Неверный формат даты. Используйте ГГГГ-ММ-ДД (например: 2024-12-25)', 'error')
+            return render_template('admin/event_form.html', form=form, title='Редактировать мероприятие', event=event)
+        
+        event.title = form.title.data
+        event.description = form.description.data
+        event.event_date = event_date 
+        event.event_time = form.event_time.data
+        event.event_type = form.event_type.data
+        event.age_group = form.age_group.data
+        event.location = form.location.data
+        event.participants = form.participants.data
+        event.materials = form.materials.data
+        event.notes = form.notes.data
+        event.status = form.status.data
+        event.updated_date = datetime.now(timezone.utc)
+        
+        db.session.commit()
+        
+        flash('Мероприятие успешно обновлено!', 'success')
+        return redirect(url_for('admin_events'))
+    
+    elif request.method == 'GET':
+        form.title.data = event.title
+        form.description.data = event.description
+        form.event_date.data = event.event_date.strftime('%Y-%m-%d')
+        form.event_time.data = event.event_time
+        form.event_type.data = event.event_type
+        form.age_group.data = event.age_group
+        form.location.data = event.location
+        form.participants.data = event.participants
+        form.materials.data = event.materials
+        form.notes.data = event.notes
+        form.status.data = event.status
+    
+    return render_template('admin/event_form.html', form=form, title='Редактировать мероприятие', event=event)
+@app.route('/admin/event/<int:event_id>/delete')
+@login_required
+def delete_event(event_id):
+    event = db.session.get(Event, event_id)
+    if not event:
+        abort(404)
+    
+    db.session.delete(event)
+    db.session.commit()
+    
+    flash('Мероприятие успешно удалено!', 'success')
+    return redirect(url_for('admin_events'))
 
 @app.route('/materials')
 def materials():

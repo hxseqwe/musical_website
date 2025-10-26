@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>{{ title }}</h1>
+        <a href="{{ url_for('admin_events') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Назад к мероприятиям
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="POST">
+                {{ form.hidden_tag() }}
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.title.label }}</label>
+                            {{ form.title(class="form-control") }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.status.label }}</label>
+                            {{ form.status(class="form-select") }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">{{ form.description.label }}</label>
+                    {{ form.description(class="form-control", rows=3) }}
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.event_date.label }}</label>
+                            {{ form.event_date(class="form-control", type="date") }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.event_time.label }}</label>
+                            {{ form.event_time(class="form-control", placeholder="Например: 10:00-11:30") }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.event_type.label }}</label>
+                            {{ form.event_type(class="form-select") }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.age_group.label }}</label>
+                            {{ form.age_group(class="form-select") }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.location.label }}</label>
+                            {{ form.location(class="form-control") }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">{{ form.participants.label }}</label>
+                    {{ form.participants(class="form-control", rows=2, placeholder="Укажите участников мероприятия...")
+                    }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">{{ form.materials.label }}</label>
+                    {{ form.materials(class="form-control", rows=2, placeholder="Опишите необходимые материалы...") }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">{{ form.notes.label }}</label>
+                    {{ form.notes(class="form-control", rows=3, placeholder="Дополнительные заметки...") }}
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save me-2"></i>{{ form.submit.label.text }}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
