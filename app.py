@@ -335,9 +335,7 @@ def edit_material(material_id):
 
 @app.route('/admin/debug')
 @login_required
-def admin_debug():
-    """Страница для отладки БД"""
-    
+def admin_debug():  
     users = User.query.all()
     materials = Material.query.all()
     visits = PageVisit.query.order_by(PageVisit.visit_date.desc()).limit(50).all()
