@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="text-success">Музыкальная шкатулка</h1>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('admin_media') }}" class="btn btn-success">
+            <i class="fas fa-plus me-2"></i>Добавить медиа-материал
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <p class="lead mb-0">
+                <i class="fas fa-music me-2 text-success"></i>
+                Аудио и видео материалы для музыкальных занятий с детьми
+            </p>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Тип:</label>
+                    <select name="media_type" class="form-select" onchange="this.form.submit()">
+                        <option value="all" {% if current_media_type=='all' %}selected{% endif %}>Все типы</option>
+                        <option value="audio" {% if current_media_type=='audio' %}selected{% endif %}>Аудио</option>
+                        <option value="video" {% if current_media_type=='video' %}selected{% endif %}>Видео</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Категория:</label>
+                    <select name="category" class="form-select" onchange="this.form.submit()">
+                        <option value="all" {% if current_category=='all' %}selected{% endif %}>Все категории</option>
+                        <option value="песня" {% if current_category=='песня' %}selected{% endif %}>Песни</option>
+                        <option value="игра" {% if current_category=='игра' %}selected{% endif %}>Игры</option>
+                        <option value="упражнение" {% if current_category=='упражнение' %}selected{% endif %}>Упражнения
+                        </option>
+                        <option value="сказка" {% if current_category=='сказка' %}selected{% endif %}>Сказки</option>
+                        <option value="танец" {% if current_category=='танец' %}selected{% endif %}>Танцы</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Возраст:</label>
+                    <select name="age_group" class="form-select" onchange="this.form.submit()">
+                        <option value="all" {% if current_age_group=='all' %}selected{% endif %}>Все возрасты</option>
+                        <option value="младшая" {% if current_age_group=='младшая' %}selected{% endif %}>Младшая
+                        </option>
+                        <option value="средняя" {% if current_age_group=='средняя' %}selected{% endif %}>Средняя
+                        </option>
+                        <option value="старшая" {% if current_age_group=='старшая' %}selected{% endif %}>Старшая
+                        </option>
+                        <option value="подготовительная" {% if current_age_group=='подготовительная' %}selected{% endif
+                            %}>Подготовительная</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Сортировка:</label>
+                    <select name="sort" class="form-select" onchange="this.form.submit()">
+                        <option value="newest" {% if current_sort=='newest' %}selected{% endif %}>Сначала новые</option>
+                        <option value="oldest" {% if current_sort=='oldest' %}selected{% endif %}>Сначала старые
+                        </option>
+                        <option value="title" {% if current_sort=='title' %}selected{% endif %}>По названию</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if media_items %}
+    <div class="row">
+        {% for item in media_items %}
+        <div class="col-lg-6 mb-4">
+            <div class="card media-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span
+                                class="badge {% if item.media_type == 'audio' %}bg-info{% else %}bg-danger{% endif %}">
+                                <i class="{{ item.file_icon }} me-1"></i>{{ item.media_type_display }}
+                            </span>
+                            <span class="badge bg-success ms-2">{{ item.category }}</span>
+                        </div>
+                        <span class="badge bg-warning">{{ item.age_group }}</span>
+                    </div>
+
+                    <h5 class="card-title">
+                        <i class="{{ item.file_icon }} me-2 text-primary"></i>{{ item.title }}
+                    </h5>
+
+                    {% if item.description %}
+                    <p class="card-text">{{ item.description }}</p>
+                    {% endif %}
+
+                    <div class="media-player mt-3">
+                        {% if item.media_type == 'audio' %}
+                        <audio controls class="w-100">
+                            <source src="{{ url_for('uploaded_file', filename=item.file_path) }}" type="audio/mpeg">
+                            Ваш браузер не поддерживает аудио элементы.
+                        </audio>
+                        {% else %}
+                        <video controls class="w-100" style="max-height: 300px;">
+                            <source src="{{ url_for('uploaded_file', filename=item.file_path) }}" type="video/mp4">
+                            Ваш браузер не поддерживает видео элементы.
+                        </video>
+                        {% endif %}
+                    </div>
+
+                    <div class="mt-3 d-flex justify-content-between align-items-center">
+                        {% if item.duration %}
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>{{ item.duration }}
+                        </small>
+                        {% endif %}
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>{{ item.created_date.strftime('%d.%m.%Y') }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if pagination.pages > 1 %}
+    <nav aria-label="Навигация по страницам">
+        <ul class="pagination justify-content-center">
+            {% if pagination.has_prev %}
+            <li class="page-item">
+                <a class="page-link"
+                    href="{{ url_for('media', page=pagination.prev_num, media_type=current_media_type, category=current_category, age_group=current_age_group, sort=current_sort) }}">
+                    <i class="fas fa-chevron-left"></i> Назад
+                </a>
+            </li>
+            {% endif %}
+
+            {% for page_num in pagination.iter_pages(left_edge=2, left_current=2, right_current=2, right_edge=2) %}
+            {% if page_num %}
+            <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                <a class="page-link"
+                    href="{{ url_for('media', page=page_num, media_type=current_media_type, category=current_category, age_group=current_age_group, sort=current_sort) }}">
+                    {{ page_num }}
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">...</span>
+            </li>
+            {% endif %}
+            {% endfor %}
+
+            {% if pagination.has_next %}
+            <li class="page-item">
+                <a class="page-link"
+                    href="{{ url_for('media', page=pagination.next_num, media_type=current_media_type, category=current_category, age_group=current_age_group, sort=current_sort) }}">
+                    Вперед <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-music fa-3x text-muted mb-3"></i>
+        <h4 class="text-muted">Медиа-материалы пока не добавлены</h4>
+        <p class="text-muted">Скоро здесь появятся аудио и видео материалы для музыкальных занятий</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

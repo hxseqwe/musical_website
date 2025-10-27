@@ -6,12 +6,12 @@ import os
 from werkzeug.exceptions import RequestEntityTooLarge
 from datetime import datetime, timezone
 from config import Config
-from models import db, User, Material, PageVisit, Event, GalleryPhoto
-from forms import LoginForm, MaterialForm, EventForm, ContactForm, GalleryForm
+from models import db, User, Material, PageVisit, Event, GalleryPhoto, MediaMaterial
+from forms import LoginForm, MaterialForm, EventForm, ContactForm, GalleryForm, MediaMaterialForm
 
 app = Flask(__name__)
 app.config.from_object(Config)
-app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
+
 
 db.init_app(app)
 login_manager = LoginManager()
@@ -369,7 +369,7 @@ def materials():
         query = query.filter_by(target_audience=audience)
     
     materials_list = query.order_by(Material.created_date.desc()).paginate(
-        page=page, per_page=6, error_out=False
+        page=page, per_page=10, error_out=False
     )
     
     return render_template('materials.html', 
@@ -646,8 +646,116 @@ def delete_photo(photo_id):
     flash('Фотография успешно удалена!', 'success')
     return redirect(url_for('admin_gallery'))
 
+
+@app.route('/media')
+def media():
+    log_visit('media')
+    
+    media_type = request.args.get('media_type', 'all')
+    category = request.args.get('category', 'all')
+    age_group = request.args.get('age_group', 'all')
+    sort = request.args.get('sort', 'newest')
+    page = request.args.get('page', 1, type=int)
+    
+    query = MediaMaterial.query.filter_by(is_published=True)
+    
+    if media_type != 'all':
+        query = query.filter_by(media_type=media_type)
+    
+    if category != 'all':
+        query = query.filter_by(category=category)
+    
+    if age_group != 'all':
+        query = query.filter_by(age_group=age_group)
+    
+    if sort == 'oldest':
+        query = query.order_by(MediaMaterial.created_date.asc())
+    elif sort == 'title':
+        query = query.order_by(MediaMaterial.title.asc())
+    else:  
+        query = query.order_by(MediaMaterial.created_date.desc())
+    
+    media_items = query.paginate(page=page, per_page=6, error_out=False)
+    
+    return render_template('media.html',
+                         media_items=media_items.items,
+                         pagination=media_items,
+                         current_media_type=media_type,
+                         current_category=category,
+                         current_age_group=age_group,
+                         current_sort=sort)
+
+@app.route('/admin/media', methods=['GET', 'POST'])
+@login_required
+def admin_media():
+    form = MediaMaterialForm()
+    
+    if form.validate_on_submit():
+        filename = None
+        if form.media_file.data:
+            try:
+                filename = secure_filename(form.media_file.data.filename)
+                file_path = os.path.join('static/uploads', filename)
+                form.media_file.data.save(file_path)
+                print(f"Файл сохранен: {file_path}")
+            except Exception as e:
+                flash(f'Ошибка при сохранении файла: {str(e)}', 'error')
+                return redirect(url_for('admin_media'))
+        else:
+            flash('Файл не выбран! Пожалуйста, выберите медиа-файл.', 'error')
+            return redirect(url_for('admin_media'))
+        
+        media_item = MediaMaterial(
+            title=form.title.data,
+            description=form.description.data,
+            file_path=filename, 
+            media_type=form.media_type.data,
+            duration=form.duration.data,
+            age_group=form.age_group.data,
+            category=form.category.data
+        )
+        
+        db.session.add(media_item)
+        db.session.commit()
+        flash('Медиа-материал успешно добавлен!', 'success')
+        return redirect(url_for('admin_media'))
+    
+    media_items = MediaMaterial.query.order_by(MediaMaterial.created_date.desc()).all()
+    return render_template('admin/media.html', form=form, media_items=media_items)
+
+@app.route('/admin/media/<int:media_id>/toggle')
+@login_required
+def toggle_media(media_id):
+    media_item = db.session.get(MediaMaterial, media_id)
+    if not media_item:
+        abort(404)
+    
+    media_item.is_published = not media_item.is_published
+    db.session.commit()
+    
+    status = "опубликован" if media_item.is_published else "скрыт"
+    flash(f'Медиа-материал "{media_item.title}" {status}!', 'success')
+    return redirect(url_for('admin_media'))
+
+@app.route('/admin/media/<int:media_id>/delete')
+@login_required
+def delete_media(media_id):
+    media_item = db.session.get(MediaMaterial, media_id)
+    if not media_item:
+        abort(404)
+    
+    if media_item.file_path and os.path.exists(os.path.join('static/uploads', media_item.file_path)):
+        os.remove(os.path.join('static/uploads', media_item.file_path))
+    
+    db.session.delete(media_item)
+    db.session.commit()
+    
+    flash('Медиа-материал успешно удален!', 'success')
+    return redirect(url_for('admin_media'))
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
         create_admin()
     app.run(debug=True)
+

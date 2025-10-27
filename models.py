@@ -104,3 +104,34 @@ class GalleryPhoto(db.Model):
 
     def __repr__(self):
         return f'<GalleryPhoto {self.title}>'
+
+class MediaMaterial(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text)
+    file_path = db.Column(db.String(300))  # УБРАЛ nullable=False
+    media_type = db.Column(db.String(20), nullable=False) 
+    duration = db.Column(db.String(20))
+    age_group = db.Column(db.String(20))
+    category = db.Column(db.String(50))  
+    created_date = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    is_published = db.Column(db.Boolean, default=True)
+
+    def __repr__(self):
+        return f'<MediaMaterial {self.title}>'
+    
+    @property
+    def file_icon(self):
+        icons = {
+            'audio': 'fas fa-music',
+            'video': 'fas fa-video'
+        }
+        return icons.get(self.media_type, 'fas fa-file')
+    
+    @property
+    def media_type_display(self):
+        types = {
+            'audio': 'Аудио',
+            'video': 'Видео'
+        }
+        return types.get(self.media_type, self.media_type)

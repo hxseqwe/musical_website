@@ -3,6 +3,7 @@ from wtforms import StringField, TextAreaField, SelectField, FileField, Password
 from wtforms.validators import DataRequired, Length, Optional
 from flask_wtf.file import FileAllowed, FileSize
 
+
 class LoginForm(FlaskForm):
     username = StringField('Логин', validators=[DataRequired()])
     password = PasswordField('Пароль', validators=[DataRequired()])
@@ -98,3 +99,61 @@ class GalleryForm(FlaskForm):
         ('все', 'Все группы')
     ], validators=[DataRequired()])
     submit = SubmitField('Добавить в галерею')
+
+class MediaMaterialForm(FlaskForm):
+    title = StringField('Название', validators=[DataRequired(), Length(max=200)])
+    description = TextAreaField('Описание')
+    media_file = FileField('Медиа-файл', validators=[
+        FileAllowed(['mp3', 'wav', 'ogg', 'mp4', 'avi', 'mov'], 'Только аудио и видео файлы!'),
+        FileSize(max_size=50*1024*1024, message='Файл не должен превышать 50MB')
+    ])
+    media_type = SelectField('Тип медиа', choices=[
+        ('audio', 'Аудио'),
+        ('video', 'Видео')
+    ], validators=[DataRequired()])
+    duration = StringField('Продолжительность', validators=[Length(max=20)])
+    age_group = SelectField('Возрастная группа', choices=[
+        ('младшая', 'Младшая группа (3-4 года)'),
+        ('средняя', 'Средняя группа (4-5 лет)'),
+        ('старшая', 'Старшая группа (5-6 лет)'),
+        ('подготовительная', 'Подготовительная группа (6-7 лет)'),
+        ('все', 'Все группы')
+    ], validators=[DataRequired()])
+    category = SelectField('Категория', choices=[
+        ('песня', 'Песня'),
+        ('игра', 'Музыкальная игра'),
+        ('упражнение', 'Упражнение'),
+        ('сказка', 'Музыкальная сказка'),
+        ('танец', 'Танцевальная композиция'),
+        ('другое', 'Другое')
+    ], validators=[DataRequired()])
+    submit = SubmitField('Добавить медиа-материал')
+
+class MediaMaterialForm(FlaskForm):
+    title = StringField('Название', validators=[DataRequired(), Length(max=200)])
+    description = TextAreaField('Описание')
+    media_file = FileField('Медиа-файл', validators=[
+        FileAllowed(['mp3', 'wav', 'ogg', 'mp4', 'avi', 'mov'], 'Только аудио и видео файлы!'),
+        FileSize(max_size=50*1024*1024, message='Файл не должен превышать 50MB')
+    ])
+    media_type = SelectField('Тип медиа', choices=[
+        ('audio', 'Аудио'),
+        ('video', 'Видео')
+    ], validators=[DataRequired()])
+    duration = StringField('Продолжительность', validators=[Length(max=20)])
+    age_group = SelectField('Возрастная группа', choices=[
+        ('младшая', 'Младшая группа (3-4 года)'),
+        ('средняя', 'Средняя группа (4-5 лет)'),
+        ('старшая', 'Старшая группа (5-6 лет)'),
+        ('подготовительная', 'Подготовительная группа (6-7 лет)'),
+        ('все', 'Все группы')
+    ], validators=[DataRequired()])
+    category = SelectField('Категория', choices=[
+        ('песня', 'Песня'),
+        ('игра', 'Музыкальная игра'),
+        ('упражнение', 'Упражнение'),
+        ('сказка', 'Музыкальная сказка'),
+        ('танец', 'Танцевальная композиция'),
+        ('другое', 'Другое')
+    ], validators=[DataRequired()])
+    submit = SubmitField('Добавить медиа-материал')
