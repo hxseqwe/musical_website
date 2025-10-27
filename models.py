@@ -109,7 +109,7 @@ class MediaMaterial(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
-    file_path = db.Column(db.String(300))  # УБРАЛ nullable=False
+    file_path = db.Column(db.String(300))  
     media_type = db.Column(db.String(20), nullable=False) 
     duration = db.Column(db.String(20))
     age_group = db.Column(db.String(20))
