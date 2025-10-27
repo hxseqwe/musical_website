@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="text-success">Галерея мероприятий</h1>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('admin_gallery') }}" class="btn btn-success">
+            <i class="fas fa-plus me-2"></i>Управление галереей
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Тип мероприятия:</label>
+                    <select name="event_type" class="form-select" onchange="this.form.submit()">
+                        <option value="all" {% if current_type=='all' %}selected{% endif %}>Все типы</option>
+                        <option value="утренник" {% if current_type=='утренник' %}selected{% endif %}>Утренники</option>
+                        <option value="занятие" {% if current_type=='занятие' %}selected{% endif %}>Занятия</option>
+                        <option value="конкурс" {% if current_type=='конкурс' %}selected{% endif %}>Конкурсы</option>
+                        <option value="праздник" {% if current_type=='праздник' %}selected{% endif %}>Праздники</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Возрастная группа:</label>
+                    <select name="age_group" class="form-select" onchange="this.form.submit()">
+                        <option value="all" {% if current_group=='all' %}selected{% endif %}>Все группы</option>
+                        <option value="младшая" {% if current_group=='младшая' %}selected{% endif %}>Младшая</option>
+                        <option value="средняя" {% if current_group=='средняя' %}selected{% endif %}>Средняя</option>
+                        <option value="старшая" {% if current_group=='старшая' %}selected{% endif %}>Старшая</option>
+                        <option value="подготовительная" {% if current_group=='подготовительная' %}selected{% endif %}>Подготовительная</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Год:</label>
+                    <select name="year" class="form-select" onchange="this.form.submit()">
+                        <option value="all" {% if current_year=='all' %}selected{% endif %}>Все годы</option>
+                        {% for year in years %}
+                        <option value="{{ year }}" {% if current_year==year %}selected{% endif %}>{{ year }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if photos %}
+    <div class="row">
+        {% for photo in photos %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card gallery-card h-100">
+                <img src="{{ url_for('uploaded_file', filename=photo.image_path) }}" 
+                     class="card-img-top gallery-image" 
+                     alt="{{ photo.title }}"
+                     style="height: 250px; object-fit: cover;">
+                <div class="card-body">
+                    <span class="badge bg-success mb-2">{{ photo.event_type }}</span>
+                    <span class="badge bg-info">{{ photo.age_group }}</span>
+                    
+                    <h5 class="card-title mt-2">{{ photo.title }}</h5>
+                    
+                    {% if photo.description %}
+                    <p class="card-text">{{ photo.description|truncate(100) }}</p>
+                    {% endif %}
+                    
+                    <div class="text-muted small">
+                        <i class="fas fa-calendar me-1"></i>
+                        {{ photo.event_date.strftime('%d.%m.%Y') }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if pagination.pages > 1 %}
+    <nav aria-label="Навигация по страницам">
+        <ul class="pagination justify-content-center">
+            {% if pagination.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('gallery', page=pagination.prev_num, event_type=current_type, age_group=current_group, year=current_year) }}">
+                    <i class="fas fa-chevron-left"></i> Назад
+                </a>
+            </li>
+            {% endif %}
+            
+            {% for page_num in pagination.iter_pages(left_edge=2, left_current=2, right_current=2, right_edge=2) %}
+                {% if page_num %}
+                    <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('gallery', page=page_num, event_type=current_type, age_group=current_group, year=current_year) }}">
+                            {{ page_num }}
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if pagination.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('gallery', page=pagination.next_num, event_type=current_type, age_group=current_group, year=current_year) }}">
+                    Вперед <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-images fa-3x text-muted mb-3"></i>
+        <h4 class="text-muted">Фотографии пока не добавлены</h4>
+        <p class="text-muted">Скоро здесь появятся фотографии с наших мероприятий</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

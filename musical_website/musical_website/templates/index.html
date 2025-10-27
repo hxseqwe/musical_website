@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero-section py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 text-white">
+                <h1 class="display-4 fw-bold">Парфирова Елена Юрьевна</h1>
+                <h2 class="h3 mb-4">Музыкальный руководитель высшей категории</h2>
+                <p class="lead my-4">Добро пожаловать на мой профессиональный сайт! Здесь я делюсь своим педагогическим
+                    опытом, методическими разработками и сценариями праздников.</p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{{ url_for('materials') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-book-open me-2"></i>Мои материалы
+                    </a>
+                    <a href="{{ url_for('about') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-user me-2"></i>Обо мне
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="profile-card bg-white rounded p-4 shadow">
+                    <i class="fas fa-music text-primary mb-3" style="font-size: 80px;"></i>
+                    <h4 class="text-dark">Парфирова Е.Ю.</h4>
+                    <p class="text-muted">Музыкальный руководитель</p>
+                    <div class="stats">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <h5 class="text-primary">{{ stats.total_materials if stats else '6' }}+</h5>
+                                <small>Материалов</small>
+                            </div>
+                            <div class="col-4">
+                                <h5 class="text-success">15+</h5>
+                                <small>Лет опыта</small>
+                            </div>
+                            <div class="col-4">
+                                <h5 class="text-warning">100+</h5>
+                                <small>Проведенных праздников</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h2 class="mb-4" style="color: #4CAF50;">Опыт и профессиональный подход</h2>
+                <p class="lead">Более 15 лет я работаю музыкальным руководителем в дошкольном образовательном
+                    учреждении. Специализируюсь на развитии музыкальных способностей детей через игровые методики и
+                    творческую деятельность.</p>
+
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-graduation-cap text-success me-2"></i>Образование</h5>
+                        <p>Высшее музыкально-педагогическое образование. Регулярно прохожу курсы повышения квалификации.
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-trophy text-warning me-2"></i>Достижения</h5>
+                        <p>Победитель конкурса "Лучший музыкальный руководитель-2023". Авторских методик и публикаций.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center">
+                <div class="achievement-badge bg-success text-white rounded-circle p-4 d-inline-block">
+                    <i class="fas fa-award fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5" style="color: #4CAF50;">Мои последние разработки</h2>
+        <div class="row">
+            {% for material in latest_materials %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <span class="badge bg-success mb-2">
+                            {% if material.category == 'consultation' %}Консультация
+                            {% elif material.category == 'scenario' %}Сценарий
+                            {% elif material.category == 'methodical' %}Методичка
+                            {% else %}Статья{% endif %}
+                        </span>
+                        <h5 class="card-title">{{ material.title }}</h5>
+                        <p class="card-text">
+                            {{ material.content | striptags | truncate(150) }}
+                        </p>
+
+                        <div class="author-signature">
+                            <small class="text-muted">
+                                <i class="fas fa-pencil-alt me-1"></i>
+                                Автор: Парфирова Е.Ю.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>
+                            {{ material.created_date.strftime('%d.%m.%Y') }}
+                        </small>
+                        <a href="{{ url_for('material_detail', material_id=material.id) }}"
+                            class="btn btn-sm btn-outline-success float-end">
+                            Читать
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('materials') }}" class="btn btn-success btn-lg">
+                <i class="fas fa-folder-open me-2"></i>Смотреть все материалы
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5" style="color: #4CAF50;">Направления работы</h2>
+        <div class="row">
+            <div class="col-md-4 text-center mb-4">
+                <div class="specialization-card p-4 rounded shadow-sm">
+                    <i class="fas fa-child fa-3x text-primary mb-3"></i>
+                    <h4>Музыкальное развитие</h4>
+                    <p>Разработка занятий по развитию музыкального слуха, ритма и творческих способностей у дошкольников
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4 text-center mb-4">
+                <div class="specialization-card p-4 rounded shadow-sm">
+                    <i class="fas fa-theater-masks fa-3x text-warning mb-3"></i>
+                    <h4>Организация праздников</h4>
+                    <p>Авторские сценарии утренников и развлечений для всех возрастных групп детского сада</p>
+                </div>
+            </div>
+            <div class="col-md-4 text-center mb-4">
+                <div class="specialization-card p-4 rounded shadow-sm">
+                    <i class="fas fa-users fa-3x text-success mb-3"></i>
+                    <h4>Работа с родителями</h4>
+                    <p>Консультации и рекомендации по музыкальному воспитанию детей в семье</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 text-center" style="background-color: #4CAF50;">
+    <div class="container">
+        <h3 class="text-white mb-4">Готовы к сотрудничеству!</h3>
+        <p class="text-white lead mb-4">Делюсь опытом, консультирую коллег, участвую в профессиональных сообществах</p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="{{ url_for('contacts') }}" class="btn btn-light btn-lg">
+                <i class="fas fa-envelope me-2"></i>Связаться со мной
+            </a>
+            {% if not current_user.is_authenticated %}
+            <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg">
+                <i class="fas fa-lock me-2"></i>Вход для администратора
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

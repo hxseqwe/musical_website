@@ -1,0 +1,223 @@
+:root {
+    --primary-color: #4CAF50;
+    --secondary-color: #FFC107;
+    --accent-color: #2196F3;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.hero-section {
+    background: #338035 !important;
+}
+
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.badge {
+    font-size: 0.7rem;
+}
+
+.btn-success {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-warning {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+.material-card {
+    border-left: 4px solid var(--primary-color);
+}
+
+.consultation-card {
+    border-left-color: var(--accent-color);
+}
+
+.scenario-card {
+    border-left-color: var(--secondary-color);
+}
+
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeIn 0.6s ease-out;
+}
+
+
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 2rem;
+    }
+
+    .hero-section .fas.fa-music {
+        font-size: 120px;
+    }
+}
+
+
+.author-note {
+    background-color: #e8f5e8;
+    border-left: 4px solid #4CAF50;
+    padding: 10px 15px;
+    margin: 15px 0;
+    border-radius: 0 5px 5px 0;
+}
+
+.professional-tip {
+    border: 2px solid #FFC107;
+    background: linear-gradient(135deg, #fff8e1 0%, #fff 100%);
+}
+
+.professional-achievement {
+    background: linear-gradient(135deg, #fff3cd 0%, #fff 100%);
+    border: 2px solid #ffc107;
+}
+
+.scenario-info {
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+.author-signature {
+    border-top: 1px dashed #dee2e6;
+    padding-top: 10px;
+    margin-top: 15px;
+}
+
+.profile-card {
+    transition: transform 0.3s ease;
+}
+
+.profile-card:hover {
+    transform: translateY(-5px);
+}
+
+.achievement-badge {
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+    transition: transform 0.3s ease;
+}
+
+.achievement-badge:hover {
+    transform: scale(1.1);
+}
+
+.specialization-card {
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.specialization-card:hover {
+    border-color: #4CAF50;
+    transform: translateY(-5px);
+}
+
+
+.author-note {
+    background-color: #e8f5e8;
+    border-left: 4px solid #4CAF50;
+    padding: 12px 15px;
+    margin: 15px 0;
+    border-radius: 0 5px 5px 0;
+    font-style: italic;
+}
+
+.material-content {
+    line-height: 1.6;
+}
+
+.material-content h3 {
+    color: #4CAF50;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.material-content h4 {
+    color: #2196F3;
+    margin-top: 1.2rem;
+    margin-bottom: 0.8rem;
+}
+
+.material-content ul {
+    padding-left: 1.5rem;
+}
+
+.material-content li {
+    margin-bottom: 0.5rem;
+}
+
+.professional-tip {
+    border: 2px solid #FFC107;
+    background: linear-gradient(135deg, #fff8e1 0%, #fff 100%);
+    padding: 15px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.gallery-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+    overflow: hidden;
+}
+
+.gallery-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.gallery-image {
+    transition: transform 0.3s ease;
+}
+
+.gallery-card:hover .gallery-image {
+    transform: scale(1.05);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.gallery-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Задержки для анимации */
+.gallery-card:nth-child(1) { animation-delay: 0.1s; }
+.gallery-card:nth-child(2) { animation-delay: 0.2s; }
+.gallery-card:nth-child(3) { animation-delay: 0.3s; }
+.gallery-card:nth-child(4) { animation-delay: 0.4s; }
+.gallery-card:nth-child(5) { animation-delay: 0.5s; }
+.gallery-card:nth-child(6) { animation-delay: 0.6s; }
