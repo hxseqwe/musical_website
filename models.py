@@ -90,3 +90,17 @@ class Event(db.Model):
             'все': 'Все группы'
         }
         return group_map.get(self.age_group, self.age_group)
+
+class GalleryPhoto(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    image_path = db.Column(db.String(300), nullable=False)
+    event_date = db.Column(db.DateTime, nullable=False)
+    event_type = db.Column(db.String(50))
+    age_group = db.Column(db.String(20))
+    created_date = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    is_published = db.Column(db.Boolean, default=True)
+
+    def __repr__(self):
+        return f'<GalleryPhoto {self.title}>'

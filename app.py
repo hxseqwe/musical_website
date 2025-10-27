@@ -6,8 +6,8 @@ import os
 from werkzeug.exceptions import RequestEntityTooLarge
 from datetime import datetime, timezone
 from config import Config
-from models import db, User, Material, PageVisit, Event
-from forms import LoginForm, MaterialForm, EventForm, ContactForm
+from models import db, User, Material, PageVisit, Event, GalleryPhoto
+from forms import LoginForm, MaterialForm, EventForm, ContactForm, GalleryForm
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -548,6 +548,103 @@ def too_large(e):
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory('static/uploads', filename)
+
+
+@app.route('/gallery')
+def gallery():
+    log_visit('gallery')
+    
+    event_type = request.args.get('event_type', 'all')
+    age_group = request.args.get('age_group', 'all')
+    year = request.args.get('year', 'all')
+    page = request.args.get('page', 1, type=int)
+    
+    query = GalleryPhoto.query.filter_by(is_published=True)
+    
+    if event_type != 'all':
+        query = query.filter_by(event_type=event_type)
+    
+    if age_group != 'all':
+        query = query.filter_by(age_group=age_group)
+    
+    if year != 'all':
+        query = query.filter(db.extract('year', GalleryPhoto.event_date) == int(year))
+    
+    years = db.session.query(db.extract('year', GalleryPhoto.event_date))\
+        .filter(GalleryPhoto.is_published == True)\
+        .distinct()\
+        .order_by(db.extract('year', GalleryPhoto.event_date).desc())\
+        .all()
+    years = [str(int(year[0])) for year in years]
+    
+    photos = query.order_by(GalleryPhoto.event_date.desc())\
+        .paginate(page=page, per_page=9, error_out=False)
+    
+    return render_template('gallery.html',
+                         photos=photos.items,
+                         pagination=photos,
+                         current_type=event_type,
+                         current_group=age_group,
+                         current_year=year,
+                         years=years)
+
+@app.route('/admin/gallery', methods=['GET', 'POST'])
+@login_required
+def admin_gallery():
+    form = GalleryForm()
+    
+    if form.validate_on_submit():
+        filename = None
+        if form.image.data:
+            filename = secure_filename(form.image.data.filename)
+            form.image.data.save(os.path.join('static/uploads', filename))
+        
+        photo = GalleryPhoto(
+            title=form.title.data,
+            description=form.description.data,
+            image_path=filename,
+            event_date=form.event_date.data,
+            event_type=form.event_type.data,
+            age_group=form.age_group.data
+        )
+        
+        db.session.add(photo)
+        db.session.commit()
+        flash('Фотография успешно добавлена в галерею!', 'success')
+        return redirect(url_for('admin_gallery'))
+    
+    photos = GalleryPhoto.query.order_by(GalleryPhoto.event_date.desc()).all()
+    return render_template('admin/gallery.html', form=form, photos=photos)
+
+@app.route('/admin/photo/<int:photo_id>/toggle')
+@login_required
+def toggle_photo(photo_id):
+    photo = db.session.get(GalleryPhoto, photo_id)
+    if not photo:
+        abort(404)
+    
+    photo.is_published = not photo.is_published
+    db.session.commit()
+    
+    status = "опубликована" if photo.is_published else "скрыта"
+    flash(f'Фотография "{photo.title}" {status}!', 'success')
+    return redirect(url_for('admin_gallery'))
+
+@app.route('/admin/photo/<int:photo_id>/delete')
+@login_required
+def delete_photo(photo_id):
+    photo = db.session.get(GalleryPhoto, photo_id)
+    if not photo:
+        abort(404)
+    
+    if photo.image_path and os.path.exists(os.path.join('static/uploads', photo.image_path)):
+        os.remove(os.path.join('static/uploads', photo.image_path))
+    
+    db.session.delete(photo)
+    db.session.commit()
+    
+    flash('Фотография успешно удалена!', 'success')
+    return redirect(url_for('admin_gallery'))
 
 if __name__ == '__main__':
     with app.app_context():

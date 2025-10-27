@@ -73,3 +73,28 @@ class ContactForm(FlaskForm):
     ], validators=[DataRequired()])
     message = TextAreaField('Сообщение', validators=[DataRequired()])
     submit = SubmitField('Отправить сообщение')
+
+class GalleryForm(FlaskForm):
+    title = StringField('Название фотографии', validators=[DataRequired(), Length(max=100)])
+    description = TextAreaField('Описание')
+    image = FileField('Фотография', validators=[
+        FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Только изображения!'),
+        FileSize(max_size=5*1024*1024, message='Файл не должен превышать 5MB')
+    ])
+    event_date = DateField('Дата мероприятия', format='%Y-%m-%d', validators=[DataRequired()])
+    event_type = SelectField('Тип мероприятия', choices=[
+        ('утренник', 'Утренник'),
+        ('занятие', 'Занятие'),
+        ('конкурс', 'Конкурс'),
+        ('праздник', 'Праздник'),
+        ('репетиция', 'Регистрация'),
+        ('другое', 'Другое')
+    ], validators=[DataRequired()])
+    age_group = SelectField('Возрастная группа', choices=[
+        ('младшая', 'Младшая группа (3-4 года)'),
+        ('средняя', 'Средняя группа (4-5 лет)'),
+        ('старшая', 'Старшая группа (5-6 лет)'),
+        ('подготовительная', 'Подготовительная группа (6-7 лет)'),
+        ('все', 'Все группы')
+    ], validators=[DataRequired()])
+    submit = SubmitField('Добавить в галерею')
