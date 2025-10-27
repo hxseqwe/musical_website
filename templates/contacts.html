@@ -46,38 +46,31 @@
                     <div class="card h-100 shadow-sm">
                         <div class="card-body">
                             <h4 class="card-title mb-4">Написать сообщение</h4>
+                            <form method="POST" action="{{ url_for('contacts') }}">
+                                {{ form.hidden_tag() }}
 
-                            <form>
                                 <div class="mb-3">
-                                    <label class="form-label">Ваше имя</label>
-                                    <input type="text" class="form-control" placeholder="Введите ваше имя">
+                                    <label class="form-label">{{ form.name.label }}</label>
+                                    {{ form.name(class="form-control") }}
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label">Email для ответа</label>
-                                    <input type="email" class="form-control" placeholder="your@email.com">
+                                    <label class="form-label">{{ form.email.label }}</label>
+                                    {{ form.email(class="form-control") }}
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label">Тема сообщения</label>
-                                    <select class="form-select">
-                                        <option selected>Выберите тему</option>
-                                        <option>Консультация по музыкальному развитию</option>
-                                        <option>Вопрос по методическим материалам</option>
-                                        <option>Предложение о сотрудничестве</option>
-                                        <option>Обмен опытом</option>
-                                        <option>Другое</option>
-                                    </select>
+                                    <label class="form-label">{{ form.subject.label }}</label>
+                                    {{ form.subject(class="form-select") }}
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label">Сообщение</label>
-                                    <textarea class="form-control" rows="5"
-                                        placeholder="Опишите ваш вопрос или предложение..."></textarea>
+                                    <label class="form-label">{{ form.message.label }}</label>
+                                    {{ form.message(class="form-control", rows=5) }}
                                 </div>
 
                                 <button type="submit" class="btn btn-success w-100">
-                                    <i class="fas fa-paper-plane me-2"></i>Отправить сообщение
+                                    <i class="fas fa-paper-plane me-2"></i>{{ form.submit.label.text }}
                                 </button>
                             </form>
                         </div>

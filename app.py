@@ -1,23 +1,23 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, abort
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os
+from werkzeug.exceptions import RequestEntityTooLarge
 from datetime import datetime, timezone
 from config import Config
 from models import db, User, Material, PageVisit, Event
-from forms import LoginForm, MaterialForm, EventForm
+from forms import LoginForm, MaterialForm, EventForm, ContactForm
 
 app = Flask(__name__)
 app.config.from_object(Config)
-
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
 
 db.init_app(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 login_manager.login_message = 'Пожалуйста, войдите для доступа к этой странице.'
-
 
 os.makedirs('static/uploads', exist_ok=True)
 
@@ -47,7 +47,6 @@ def create_admin():
         add_initial_data()
 
 def add_initial_data():
-    
     initial_materials = [
         {
             'title': 'Мой подход: Как развивать музыкальность у детей 3-4 лет',
@@ -77,7 +76,6 @@ def add_initial_data():
             'category': 'consultation',
             'target_audience': 'parents'
         },
-        
         {
             'title': 'Мой опыт: Роль музыки в развитии речи дошкольников',
             'content': '''<div class="author-note">
@@ -97,7 +95,6 @@ def add_initial_data():
             'category': 'consultation',
             'target_audience': 'parents'
         },
-
         {
             'title': 'Авторский сценарий "Осенняя сказка" для средней группы',
             'content': '''<div class="author-note">
@@ -115,7 +112,6 @@ def add_initial_data():
             'category': 'scenario',
             'target_audience': 'teachers'
         },
-
         {
             'title': 'Новогодний утренник "Волшебная снежинка" для старшей группы',
             'content': '''<div class="author-note">
@@ -133,7 +129,6 @@ def add_initial_data():
             'category': 'scenario',
             'target_audience': 'teachers'
         },
-
         {
             'title': 'Авторская программа "Музыкальная радуга" для детей 4-5 лет',
             'content': '''<div class="author-note">
@@ -194,6 +189,7 @@ def index():
     return render_template('index.html', 
                          latest_materials=latest_materials,
                          stats=stats)
+
 @app.route('/calendar')
 def calendar():
     now = datetime.now(timezone.utc)
@@ -233,6 +229,22 @@ def calendar():
                          next_year=next_year,
                          next_month=next_month)
 
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    print(f"500 Error: {error}")
+    return render_template('500.html'), 500
+
+
+@app.route('/test-500')
+def test_500():
+
+    abort(500)
+
 @app.route('/event/<int:event_id>')
 def event_detail(event_id):
     event = db.session.get(Event, event_id)
@@ -249,8 +261,8 @@ def admin_events():
     
     stats = {
         'total': len(events),
-        'planned': len([e for e in events if e.status == 'Запланировано']),
-        'completed': len([e for e in events if e.status == 'Завершено']),
+        'planned': len([e for e in events if e.status == 'запланировано']),
+        'completed': len([e for e in events if e.status == 'завершено']),
         'this_month': len([e for e in events if e.event_date.month == datetime.now().month])
     }
     
@@ -262,16 +274,10 @@ def new_event():
     form = EventForm()
     
     if form.validate_on_submit():
-        try:
-            event_date = datetime.strptime(form.event_date.data, '%Y-%m-%d')
-        except ValueError:
-            flash('Неверный формат даты. Используйте ГГГГ-ММ-ДД (например: 2024-12-25)', 'error')
-            return render_template('admin/event_form.html', form=form, title='Добавить мероприятие')
-        
         event = Event(
             title=form.title.data,
             description=form.description.data,
-            event_date=event_date,
+            event_date=form.event_date.data,
             event_time=form.event_time.data,
             event_type=form.event_type.data,
             age_group=form.age_group.data,
@@ -300,15 +306,9 @@ def edit_event(event_id):
     form = EventForm()
     
     if form.validate_on_submit():
-        try:
-            event_date = datetime.strptime(form.event_date.data, '%Y-%m-%d')
-        except ValueError:
-            flash('Неверный формат даты. Используйте ГГГГ-ММ-ДД (например: 2024-12-25)', 'error')
-            return render_template('admin/event_form.html', form=form, title='Редактировать мероприятие', event=event)
-        
         event.title = form.title.data
         event.description = form.description.data
-        event.event_date = event_date 
+        event.event_date = form.event_date.data
         event.event_time = form.event_time.data
         event.event_type = form.event_type.data
         event.age_group = form.age_group.data
@@ -327,7 +327,7 @@ def edit_event(event_id):
     elif request.method == 'GET':
         form.title.data = event.title
         form.description.data = event.description
-        form.event_date.data = event.event_date.strftime('%Y-%m-%d')
+        form.event_date.data = event.event_date
         form.event_time.data = event.event_time
         form.event_type.data = event.event_type
         form.age_group.data = event.age_group
@@ -338,6 +338,7 @@ def edit_event(event_id):
         form.status.data = event.status
     
     return render_template('admin/event_form.html', form=form, title='Редактировать мероприятие', event=event)
+
 @app.route('/admin/event/<int:event_id>/delete')
 @login_required
 def delete_event(event_id):
@@ -357,6 +358,7 @@ def materials():
     
     category = request.args.get('category', 'all')
     audience = request.args.get('audience', 'all')
+    page = request.args.get('page', 1, type=int)
     
     query = Material.query.filter_by(is_published=True)
     
@@ -366,10 +368,13 @@ def materials():
     if audience != 'all':
         query = query.filter_by(target_audience=audience)
     
-    materials_list = query.order_by(Material.created_date.desc()).all()
+    materials_list = query.order_by(Material.created_date.desc()).paginate(
+        page=page, per_page=6, error_out=False
+    )
     
     return render_template('materials.html', 
-                         materials=materials_list,
+                         materials=materials_list.items,
+                         pagination=materials_list,
                          current_category=category,
                          current_audience=audience)
 
@@ -386,10 +391,23 @@ def about():
     log_visit('about')
     return render_template('about.html')
 
-@app.route('/contacts')
+@app.route('/contacts', methods=['GET', 'POST'])
 def contacts():
     log_visit('contacts')
-    return render_template('contacts.html')
+    form = ContactForm()
+    
+    if form.validate_on_submit():
+        name = form.name.data
+        email = form.email.data
+        subject = form.subject.data
+        message = form.message.data
+        
+        print(f"Получено сообщение от {name} ({email}): {subject}")
+        
+        flash('Сообщение отправлено! Я свяжусь с вами в ближайшее время.', 'success')
+        return redirect(url_for('contacts'))
+    
+    return render_template('contacts.html', form=form)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -520,6 +538,12 @@ def delete_material(material_id):
     db.session.commit()
     flash('Материал успешно удален!', 'success')
     return redirect(url_for('admin_materials'))
+
+@app.errorhandler(413)
+@app.errorhandler(RequestEntityTooLarge)
+def too_large(e):
+    flash('Файл слишком большой! Максимальный размер: 10MB', 'error')
+    return redirect(request.url)
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):

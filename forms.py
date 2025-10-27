@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SelectField, FileField, PasswordField, BooleanField, SubmitField
-from wtforms.validators import DataRequired, Email, Length, Optional
-from flask_wtf.file import FileAllowed
+from wtforms import StringField, TextAreaField, SelectField, FileField, PasswordField, BooleanField, SubmitField, DateField
+from wtforms.validators import DataRequired, Length, Optional
+from flask_wtf.file import FileAllowed, FileSize
 
 class LoginForm(FlaskForm):
     username = StringField('Логин', validators=[DataRequired()])
@@ -22,12 +22,15 @@ class MaterialForm(FlaskForm):
         ('parents', 'Родители'),
         ('all', 'Все')
     ], validators=[DataRequired()])
-    file = FileField('Файл', validators=[FileAllowed(['pdf', 'doc', 'docx', 'jpg', 'png'], 'Только документы и изображения!')])
+    file = FileField('Файл', validators=[
+        FileAllowed(['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'], 'Только документы и изображения!'),
+        FileSize(max_size=10*1024*1024, message='Файл не должен превышать 10MB')
+    ])
 
 class EventForm(FlaskForm):
     title = StringField('Название мероприятия', validators=[DataRequired(), Length(max=200)])
     description = TextAreaField('Описание')
-    event_date = StringField('Дата мероприятия (ГГГГ-ММ-ДД)', validators=[DataRequired(), Length(max=10)])
+    event_date = DateField('Дата мероприятия', format='%Y-%m-%d', validators=[DataRequired()])
     event_time = StringField('Время проведения', validators=[Length(max=50)])
     event_type = SelectField('Тип мероприятия', choices=[
         ('утренник', 'Утренник'),
@@ -56,3 +59,17 @@ class EventForm(FlaskForm):
         ('отменено', 'Отменено')
     ])
     submit = SubmitField('Сохранить мероприятие')
+
+class ContactForm(FlaskForm):
+    name = StringField('Ваше имя', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired()])
+    subject = SelectField('Тема сообщения', choices=[
+        ('', 'Выберите тему'),
+        ('Консультация по музыкальному развитию', 'Консультация по музыкальному развитию'),
+        ('Вопрос по методическим материалам', 'Вопрос по методическим материалам'),
+        ('Предложение о сотрудничестве', 'Предложение о сотрудничестве'),
+        ('Обмен опытом', 'Обмен опытом'),
+        ('Другое', 'Другое')
+    ], validators=[DataRequired()])
+    message = TextAreaField('Сообщение', validators=[DataRequired()])
+    submit = SubmitField('Отправить сообщение')

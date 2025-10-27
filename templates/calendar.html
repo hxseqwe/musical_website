@@ -47,8 +47,8 @@
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <span
-                                        class="badge {% if event.status == 'Завершено' %}bg-success{% elif event.status == 'Отменено' %}bg-danger{% elif event.status == 'В процессе' %}bg-warning{% else %}bg-primary{% endif %}">
-                                        {{ event.status }}
+                                        class="badge {% if event.status == 'завершено' %}bg-success{% elif event.status == 'отменено' %}bg-danger{% elif event.status == 'в_процессе' %}bg-warning{% else %}bg-primary{% endif %}">
+                                        {{ event.status_display }}
                                     </span>
                                     <span class="badge bg-info">{{ event.age_group }}</span>
                                 </div>

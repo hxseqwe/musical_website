@@ -20,8 +20,8 @@
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
                             <span
-                                class="badge {% if event.status == 'completed' %}bg-success{% elif event.status == 'cancelled' %}bg-danger{% elif event.status == 'in_progress' %}bg-warning{% else %}bg-primary{% endif %} mb-2">
-                                {{ event.status }}
+                                class="badge {% if event.status == 'завершено' %}bg-success{% elif event.status == 'отменено' %}bg-danger{% elif event.status == 'в_процессе' %}bg-warning{% else %}bg-primary{% endif %} mb-2">
+                                {{ event.status_display }}
                             </span>
                             <span class="badge bg-info ms-2">{{ event.age_group }}</span>
                         </div>

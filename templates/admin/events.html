@@ -74,13 +74,12 @@
                             </td>
                             <td>{{ event.event_date.strftime('%d.%m.%Y') }}</td>
                             <td>
-                                <span class="badge bg-secondary">{{ event.event_type }}</span>
+                                <span class="badge bg-secondary">{{ event.event_type_display }}</span>
                             </td>
-                            <td>{{ event.age_group }}</td>
+                            <td>{{ event.age_group_display }}</td>
                             <td>
-                                <span
-                                    class="badge {% if event.status == 'completed' %}bg-success{% elif event.status == 'cancelled' %}bg-danger{% elif event.status == 'in_progress' %}bg-warning{% else %}bg-primary{% endif %}">
-                                    {{ event.status }}
+                                <span class="badge bg-{{ event.status_color }}">
+                                    {{ event.status_display }}
                                 </span>
                             </td>
                             <td>

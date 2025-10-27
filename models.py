@@ -40,7 +40,7 @@ class Event(db.Model):
     participants = db.Column(db.Text)
     materials = db.Column(db.Text)
     notes = db.Column(db.Text)
-    status = db.Column(db.String(20), default='запланировано')
+    status = db.Column(db.String(20), default='запланировано') 
     created_date = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     updated_date = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
@@ -56,6 +56,16 @@ class Event(db.Model):
             'отменено': 'Отменено'
         }
         return status_map.get(self.status, self.status)
+    
+    @property
+    def status_color(self):
+        color_map = {
+            'запланировано': 'primary',
+            'в_процессе': 'warning', 
+            'завершено': 'success',
+            'отменено': 'danger'
+        }
+        return color_map.get(self.status, 'secondary')
     
     @property
     def event_type_display(self):
